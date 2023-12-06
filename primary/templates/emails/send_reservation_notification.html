@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #007bff;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Reservation Notification</h2>
+        <p>Dear {{ user.first_name }},</p>
+        <p>Congratulations! You have successfully reserved {{ book.title }}.</p>
+        <p>Reservation Details:</p>
+        <ul>
+            <li><strong>User:</strong> {{ user.first_name }} {{ user.last_name }}</li>
+            <li><strong>Book:</strong> {{ book.title }}</li>
+            <li><strong>Reservation Date:</strong> {{ reservation.date }}</li>
+        </ul>
+        <p>Please collect the book from our library</p>
+        <p>Thank you </p>
+        <footer><small>&copy; Ayush Library Management System 2023</small></footer>
+
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #007bff;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Borrow Notification</h2>
+        <p>Dear {{ user.first_name }},</p>
+        <p>Congratulations! You have successfully borrowed 
+        </p>
+        <p>Please return the book within {{ borrow.due_date }}.</p>
+        <p>Thank you for using our library.</p>
+        <h3 style="color: red;background-color: yellow;"><b>Note</b>You can't reborrow any book until you return all the borowed books</h3>
+        <footer><small>&copy; Ayush Library Management System 2023</small></footer>
+    </div>
+</body>
+</html>

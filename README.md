@@ -1,0 +1,67 @@
+#             Library Management system 
+
+
+
+Welcome to the Library Management System – your library's newest ally! 📚 This intelligent system simplifies library tasks, serving everyone from avid readers to the unsung heroes working behind the scenes.
+
+
+
+
+User Roles:
+--
+
+Normal User: Explore the library catalog, view book details, leave reviews, reply to reviews, and reserve books.
+
+Staff User: Possess all the permissions of a normal user, with additional capabilities to add, delete, and update books. Staff members can also monitor user activities, keeping track of book borrowings and returns using unique user IDs.
+
+Admin User: Administrators possess elevated permissions, allowing them to manage all aspects of the library system, including user management, book inventory, and system configuration.
+
+
+
+
+## Getting Started
+
+
+1-First of all clone this repo
+--
+--> git clone https://github.com/AyushTmg/Library-System.git
+
+2-Setup a virtual enviroment
+--
+-->python -m venv venv
+
+3-Install all dependencies from the requirements.txt in a virtual enviroment
+--
+--> pip install -r requirements.txt
+
+4- Configure database according to your reliability in this case postgres is used
+--
+DATABASES = {\
+   'default': {\
+        'ENGINE': 'django.db.backends.postgresql',\
+        'NAME': 'your_database_name',\
+        'USER': 'your_database_user',\
+        'PASSWORD': 'your_database_password',\
+        'HOST': 'localhost',\
+        'PORT': '5432',\
+}\
+}
+
+5-Add .env file and add these field
+--
+
+EMAIL_USER="Your email"
+EMAIL="Your email"
+EMAIL_PASSWORD="email password"
+
+SECRET_KEY='secret key'
+
+
+6-Migrate the changes to your database
+--
+-->python manage.py migrate\
+-->python manage.py runserver
+
+7-Run Application
+--
+-->python manage.py runserver
