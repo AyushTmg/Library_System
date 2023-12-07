@@ -77,7 +77,7 @@ class ReplySerializer(serializers.ModelSerializer):
         review_id=self.context['review_id']
         user_id=self.context['user_id']
         return Reply.objects.create(review_id=review_id,user_id=user_id,**validated_data)
-
+    
 class CreateBorrowSerializer(serializers.Serializer):
     user_id=serializers.IntegerField()
     duration=serializers.IntegerField()
@@ -88,41 +88,38 @@ class CreateBorrowSerializer(serializers.Serializer):
             User = get_user_model()
             user = User.objects.get(pk=user_id)
 
+            try:
+                existing_borrow = Borrow.objects.get(user=user)
+                raise serializers.ValidationError(_("You can't borrow books until you return all the borrowed books"))
+            except Borrow.DoesNotExist:
+                pass
+
             if not user.reservation.exists():
                     raise serializers.ValidationError(_("You haven't reserved any book to borrow"))
             
             if self.validated_data['duration'] > 10 and not (user.is_staff or user.is_superuser):
                 raise serializers.ValidationError(_("Normal user cant set duration more than 10"))
             
+            reservation=Reservation.objects.filter(user_id=user_id).prefetch_related('book')
+            borrow = Borrow(
+                user=user,
+                date=timezone.now().date(),
+                duration=validated_data['duration']
+            )
+            borrow.save() 
+
             try:
-                reservation=Reservation.objects.filter(user_id=user_id).prefetch_related('book')
-                borrow = Borrow(
-                    user=user,
-                    date=timezone.now().date(),
-                    duration=validated_data['duration']
-                )
-                borrow.save() 
-
-                if not reservation.exists():
-                    raise serializers.ValidationError(_("Reservation with given id doesnt exist"))
-
-                try:
-                        for item in reservation:
-                            borrow.book.add(item.book)
-                            book=Book.objects.get(id=item.book.id)
-                            book.quantity-=1
-                            book.save()
-                        reservation.delete()
-                        return borrow
-                
-                except Exception:
-                    raise serializers.ValidationError(_("Some error occured during reservation"))
-                
-            except Exception as error:
-                print(error)
-                raise serializers.ValidationError(_("You can't borrow books untill you return all the borrowed books"))
-
-
+                    for item in reservation:
+                        borrow.book.add(item.book)
+                        book=Book.objects.get(id=item.book.id)
+                        book.quantity-=1
+                        book.save()
+                    reservation.delete()
+                    return borrow
+            
+            except Exception:
+                raise serializers.ValidationError(_("Some error occured during reservation"))
+            
 class UpdateBorrowSerializer(serializers.ModelSerializer):
     class Meta:
         model=Borrow
@@ -195,7 +192,7 @@ class CreateReturnSerializer(serializers.ModelSerializer):
                 user_id = validated_data['user_id']
                 User = get_user_model()
                 user = User.objects.get(pk=user_id)
-                borrow = Borrow.objects.select_related('user').prefetch_related('book').get(user=user)
+                borrow = Borrow.objects.prefetch_related('book').get(user=user)
                 returned_books = validated_data['book']
                 return_book, created = ReturnBook.objects.get_or_create(user=user)
                 return_book.book.add(*returned_books)
@@ -227,7 +224,7 @@ class UpdateReturnSerializer(serializers.ModelSerializer):
                 user_id = self.context['user_id']
                 User = get_user_model()
                 user = User.objects.get(pk=user_id)
-                borrow = Borrow.objects.select_related('user').prefetch_related('book').get(user=user)
+                borrow = Borrow.objects.prefetch_related('book').get(user=user)
                 returned_books = validated_data['book']
                 instance.book.add(*returned_books)
                 borrow.book.remove(*returned_books)

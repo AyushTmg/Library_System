@@ -22,7 +22,7 @@ def send_reservation_notification(reservation_id):
 @shared_task(name='borrow_notification')
 def send_borrow_notification(borrow_id):
         try:
-                borrow=Borrow.objects.get(pk=borrow_id).select_related('user')
+                borrow=Borrow.objects.get(pk=borrow_id)
                 user_email = borrow.user.email
                 subject = 'Borrow Notification'
                 context = {'user': borrow.user,'borrow':borrow}

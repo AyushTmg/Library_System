@@ -5,7 +5,7 @@ import random
 
 
 class User(AbstractUser):
-    id=models.IntegerField(unique=True,primary_key=True)
+    # id=models.IntegerField(unique=True,primary_key=True)
     first_name=models.CharField(max_length=120)
     last_name=models.CharField(max_length=120)
     email=models.EmailField(unique=True)
