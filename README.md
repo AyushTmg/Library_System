@@ -18,8 +18,31 @@ Admin User: Administrators possess elevated permissions, allowing them to manage
 
 
 
+Notification
+=
 
-## Getting Started
+
+Reservation Notification
+--
+
+Upon successful reservation, a notification email is sent to the user.\
+![image](https://github.com/AyushTmg/Library_System/assets/119398357/b15e5c9c-460b-4677-ad4a-381cc85ddf18)
+
+
+Borrowing Notification
+--
+When a user borrows a book, a notification is sent, including details the due date.\
+![image](https://github.com/AyushTmg/Library_System/assets/119398357/1c0b24be-f29d-4465-bdf4-de87ec52589d)
+
+
+Return Notification
+--
+Upon returning books, a notification is sent, confirming the return and providing any relevant information\
+![image](https://github.com/AyushTmg/Library_System/assets/119398357/1887e642-538a-479f-8a72-f7c4cfa30033)
+
+
+
+## Installation
 
 
 1-First of all clone this repo
