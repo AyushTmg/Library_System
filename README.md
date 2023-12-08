@@ -47,44 +47,48 @@ Upon returning books, a notification is sent, confirming the return and providin
 
 1-First of all clone this repo
 --
---> git clone https://github.com/AyushTmg/Library-System.git
+
+        git clone https://github.com/AyushTmg/Library-System.git
+
 
 2-Setup a virtual enviroment
 --
--->python -m venv venv
+
+        python -m venv venv
 
 3-Install all dependencies from the requirements.txt in a virtual enviroment
 --
---> pip install -r requirements.txt
+
+        pip install -r requirements.txt
 
 4- Configure database according to your reliability in this case postgres is used
 --
-DATABASES = {\
-   'default': {\
-        'ENGINE': 'django.db.backends.postgresql',\
-        'NAME': 'your_database_name',\
-        'USER': 'your_database_user',\
-        'PASSWORD': 'your_database_password',\
-        'HOST': 'localhost',\
-        'PORT': '5432',\
-}\
-}
+        DATABASES = {
+        'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': 'your_database_name',
+                'USER': 'your_database_user',
+                'PASSWORD': 'your_database_password',
+                'HOST': 'localhost',
+                'PORT': '5432',
+        }
+        }
 
 5-Add .env file and add these field
 --
 
-EMAIL_USER="Your email"
-EMAIL="Your email"
-EMAIL_PASSWORD="email password"
+        EMAIL_USER="Your email"
+        EMAIL="Your email"
+        EMAIL_PASSWORD="email password"
 
-SECRET_KEY='secret key'
+        SECRET_KEY='secret key'
 
 
 6-Migrate the changes to your database
 --
--->python manage.py migrate\
--->python manage.py runserver
+        python manage.py migrate
+        python manage.py runserver
 
 7-Run Application
 --
--->python manage.py runserver
+        python manage.py runserver
