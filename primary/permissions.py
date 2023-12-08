@@ -1,13 +1,9 @@
 from rest_framework.permissions import BasePermission
 from rest_framework import permissions
-from rest_framework import status
-from rest_framework.response import Response
 from .models import *
 
 class IsUserOrAdminForDelete(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
         return obj.user == request.user or request.user.is_staff
     
 class ReviewAndReplyPermission(BasePermission):
@@ -24,6 +20,18 @@ class IsUserOrAdminOnly(BasePermission):
         if obj.user == request.user or request.user.is_staff:
             return True 
         return False
+    
+
+class IsNormalUserOrAdmin(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.user == request.user or request.user.is_superuser
+    
+    def has_permission(self, request, view):
+        if request.user.is_staff and (not request.user.is_superuser):
+            return False
+        return request.user or request.user.is_superuser
+
+
     
 
     

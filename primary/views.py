@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser,IsAuthenticated,AllowAny
 from rest_framework import permissions
 from rest_framework import status
-from .permissions import IsUserOrAdminForDelete,ReviewAndReplyPermission,IsUserOrAdminOnly
+from .permissions import IsUserOrAdminForDelete,ReviewAndReplyPermission,IsUserOrAdminOnly,IsNormalUserOrAdmin
 from .models import *
 from .serializers import *
 
@@ -83,7 +83,7 @@ class ReplyViewSet(ModelViewSet):
 class ReservationViewSet(ModelViewSet):
     http_method_names=('get', 'head', 'options','post','delete')
     serializer_class=ReservationSerializer
-    permission_classes=[IsUserOrAdminOnly,IsAuthenticated]
+    permission_classes=[IsNormalUserOrAdmin,IsAuthenticated]
    
     def get_queryset(self):
         book_id=self.kwargs['book_pk']
@@ -96,6 +96,10 @@ class ReservationViewSet(ModelViewSet):
         book_id=self.kwargs['book_pk']
         user_id=self.request.user.id
         return {'book_id':book_id,'user_id':user_id}
+    
+    
+    
+    
     
 class BorrowViewSet(ModelViewSet):
     serializer_class=BorrowSerializer
