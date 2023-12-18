@@ -1,3 +1,4 @@
+
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser,IsAuthenticated,AllowAny
@@ -6,6 +7,12 @@ from rest_framework import status
 from .permissions import IsUserOrAdminForDelete,ReviewAndReplyPermission,IsUserOrAdminOnly,IsNormalUserOrAdmin
 from .models import *
 from .serializers import *
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter,OrderingFilter
+from .pagination import Default
+
+
+
 
 class ProfileViewSet(ModelViewSet):
     http_method_names=['get','put']
@@ -45,7 +52,11 @@ class BookImageViewSet(ModelViewSet):
         
 class BookViewSet(ModelViewSet):
     queryset=Book.objects.select_related('genre').prefetch_related('images').all()
+    filter_backends=[DjangoFilterBackend,SearchFilter]
+    filterset_fields=['genre']
+    search_fields=['title','author']
     serializer_class=BookSerializer
+    pagination_class=Default
 
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
@@ -55,6 +66,8 @@ class BookViewSet(ModelViewSet):
 class ReviewViewSet(ModelViewSet):
     serializer_class=ReviewSerializer
     permission_classes=[ReviewAndReplyPermission,IsUserOrAdminForDelete,IsAuthenticated]
+    filter_backends=[OrderingFilter]
+    ordering_fields=['date']
 
     def get_queryset(self):
         book_id=self.kwargs['book_pk']
@@ -96,10 +109,6 @@ class ReservationViewSet(ModelViewSet):
         book_id=self.kwargs['book_pk']
         user_id=self.request.user.id
         return {'book_id':book_id,'user_id':user_id}
-    
-    
-    
-    
     
 class BorrowViewSet(ModelViewSet):
     serializer_class=BorrowSerializer
