@@ -1,13 +1,17 @@
-from collections.abc import Iterable
+from datetime import timedelta
+from uuid import uuid4
+
+
 from django.db import models
-from django.core.validators import MinValueValidator,MaxValueValidator
 from django.conf import settings
 from django.contrib import admin
-from datetime import timedelta
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from  django.core.exceptions import ValidationError
-from uuid import uuid4
+from django.utils.translation import gettext_lazy as _
+from django.core.validators import MinValueValidator,MaxValueValidator
+
+
+
 
  
 # !User Profile Model 
@@ -31,6 +35,8 @@ class Profile(models.Model):
         return self.user.last_name
     
     
+    
+    
 #! Book Genre Model
 class Genre(models.Model):
     id=models.UUIDField(unique=True,primary_key=True,default=uuid4)
@@ -38,6 +44,8 @@ class Genre(models.Model):
 
     def __str__(self) -> str:
         return self.title
+    
+
 
 # !Book Model
 class Book(models.Model):
@@ -62,8 +70,12 @@ class Book(models.Model):
             self.is_available = True
         super().save(*args, **kwargs)
 
+
+
     def __str__(self):
         return self.title
+    
+
     
 class BookImage(models.Model):
     id=models.UUIDField(unique=True,primary_key=True,default=uuid4)
@@ -82,6 +94,8 @@ class Review(models.Model):
 
     def __str__(self) -> str:
         return self.description
+    
+
 
 # !Book Review's Reply Model
 class Reply(models.Model):
@@ -106,14 +120,18 @@ class Reservation(models.Model):
     def clean(self):
         if not self.book.is_available:
             raise ValidationError(_(f'{self.book} is not available for reservation at the moment\n'))
+        
         if Reservation.objects.filter(user=self.user,book=self.book).exists():
             raise ValidationError(_("User can't reserve the same book multiple times"))
+        
         if self.user.reservation.count() > 10 and not ( self.user.is_staff or  self.user.is_superuser):
             raise ValidationError(_('User cannot reserve more than 10 books.'))
+        
         return super().clean()
 
     def __str__(self):
         return f"{self.user} has reserved {self.book.title}"
+    
 
 
 # !Book Borrow Model
@@ -128,6 +146,8 @@ class Borrow(models.Model):
         ]
     )
     due_date=models.DateField(null=True,blank=True)
+
+
 
     def clean(self):
         if self.duration >10 and not (self.user.is_staff or self.user.is_superuser):
@@ -151,23 +171,12 @@ class Borrow(models.Model):
 
 
 
+# !Returned Book model for borrowed books
 class ReturnBook(models.Model):
     user=models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name='return_book',primary_key=True)
     returned_at=models.DateField(auto_now_add=True)
     book = models.ManyToManyField('Book', related_name='returned_books')
-    # late_fee = models.FloatField(default=0.0, validators=[MinValueValidator(0.0)])
-    
-    # def calculate_late_fee(self):
-    #     self.returned_at=timezone.now().date()
-    #     if self.returned_at<=self.user.borrow.due_date:
-    #         return 0.0
-    #     late_days=(self.returned_at-self.user.borrow.due_date).days
-    #     late_fee=late_days*25.0
-    #     return late_fee
-    
-    # def save(self, *args, **kwargs):
-    #     self.late_fee = self.calculate_late_fee()
-    #     super().save(*args, **kwargs)
+
 
 
 

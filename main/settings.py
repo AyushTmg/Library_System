@@ -5,17 +5,28 @@ import os
 
 
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY ='django-insecure-m1jj!33*++x80n*=bwko-@%&1wa)jw3xj5fbs@+s@(008adewt'
-# SECURITY WARNING: don't run with debug turned on in production!
+SECRET_KEY =os.environ.get('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
+PROJECT_APP=[
+    'authentication',
+    'primary',
+]
 
-# Application definition
+THIRD_PARTY_APP=[
+    'rest_framework',
+    'djoser',
+    'django_filters',
+    'django_celery_results',
+    'django_celery_beat',
+    "corsheaders",
+    "debug_toolbar",
+]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -24,16 +35,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'djoser',
-    'django_filters',
-    'django_celery_results',
-    'django_celery_beat',
-    "corsheaders",
-    "debug_toolbar",
-    'authentication',
-    'primary',
-]
+]+PROJECT_APP+THIRD_PARTY_APP
+
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -47,7 +52,9 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
+
 ROOT_URLCONF = 'main.urls'
+
 
 TEMPLATES = [
     {
@@ -65,23 +72,21 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'main.wsgi.application'
 
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME':'rockey',
+        'NAME':os.environ.get('DB_NAME'),
         'USER': 'postgres', 
-        'PASSWORD': 'mindonmoney', 
+        'PASSWORD': os.environ.get('DB_PASS'), 
         'HOST': 'localhost', 
 
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -99,8 +104,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -111,30 +114,38 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+# ! CONFIGURATIONS FOR STATIC FOLDER
 STATIC_URL = 'static/'
 STATICFILES_DIRS=[
     os.path.join(BASE_DIR,'static')
 ]
 
+# ! CONFIGURATIONS FOR MEDIA FOLDER
 MEDIA_URL='media/'
 MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# !CONFIGURATIONS FOR DJANGO DEBUG TOOLBAR
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-AUTH_USER_MODEL='account.User'
+# !CONFIGURATIONS FOR CUSTOME USER
+AUTH_USER_MODEL='authentication.User'
+
+
+
+# !CONFIGURATIONS FOR USING SIMPLE JWT
 SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('JWT',),
     "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=10),
         "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -144,11 +155,13 @@ REST_FRAMEWORK = {
     ),
 }
 
+
+
+# !CONFIGURATIONS FOR USING DJOSER
 DJOSER={
     'SERIALIZERS':{
-        'user':'account.serializers.UserSerializer',
-        'current_user':'account.serializers.UserSerializer',
-        # 'user_delete': 'djoser.serializers.UserDeleteSerializer',
+        'user':'authentication.serializers.UserSerializer',
+        'current_user':'authentication.serializers.UserSerializer',
     },
     'LOGIN_FIELD':'email',
     'USER_CREATE_PASSWORD_RETYPE':True,
@@ -163,6 +176,9 @@ DJOSER={
     'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
 
 }
+
+
+
 # !For CORS
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
