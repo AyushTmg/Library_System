@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     "corsheaders",
     "debug_toolbar",
-    'account',
+    'authentication',
     'primary',
 ]
 
