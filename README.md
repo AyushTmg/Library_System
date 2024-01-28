@@ -5,6 +5,7 @@
 Welcome to the Library Management System – your library's newest ally! 📚 This intelligent system simplifies library tasks, serving everyone from avid readers to the unsung heroes working behind the scenes.
 
 
+Technologies used: Django, Django Rest Framework, Djoser,Celery, Django Debug Toolbar, PostgreSQL, Redis, Pillow, Requests, Django-CORS-Headers,DRF-Nested-Routers.
 
 
 User Roles:
