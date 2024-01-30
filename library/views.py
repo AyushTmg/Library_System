@@ -6,13 +6,24 @@ from .models import (
 
 from .serializers import (
     BookSerializer,
-    BookDetailSerializer
+    GetBookDetailSerializer,
+    UpdateBookDetailSerializer,
+    UserSerializer
+
 )
 
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.status import  HTTP_200_OK
 from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated,AllowAny
-from rest_framework.generics import ListCreateAPIView,RetrieveUpdateDestroyAPIView
+from rest_framework.generics import (
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 
+from django.contrib.auth import get_user_model
 
 
 
@@ -51,8 +62,12 @@ class BookDetailView(RetrieveUpdateDestroyAPIView):
     retrieving a single instance of a model 
     for display,update and delete
     """
-    serializer_class = BookDetailSerializer
 
+    def get_serializer_class(self):
+        if self.request.method in ['GET','HEAD','OPTIONS']:
+               return GetBookDetailSerializer
+        return UpdateBookDetailSerializer
+     
 
     def get_queryset(self):
             """
@@ -70,5 +85,23 @@ class BookDetailView(RetrieveUpdateDestroyAPIView):
         if self.request.method in permissions.SAFE_METHODS:
             return  [AllowAny()]
         return [IsAuthenticated()]
+    
 
 
+class UserListView(APIView):
+    serailizer_class=UserSerializer
+
+    def get(self,request) -> Response:
+        User = get_user_model()
+        user = User.objects.all()
+        serializer = self.serailizer_class(user,many=True)
+        return  Response(serializer.data,status=HTTP_200_OK)
+         
+
+
+
+
+
+
+
+     

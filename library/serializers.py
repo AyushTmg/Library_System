@@ -9,7 +9,11 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
 
+from django.conf import settings 
+from django.contrib.auth import get_user_model
 
+
+User = get_user_model()
 
 
 # ! Book Detail Serializer
@@ -20,7 +24,11 @@ class  InputBookDetailSerializer(ModelSerializer):
     """
     class Meta:
         model = BookDetail
-        fields=['publisher','language','number_of_pages']
+        fields=[
+            'publisher',
+            'language',
+            'number_of_pages'
+        ]
     
 
 
@@ -60,11 +68,42 @@ class BookSerializer(ModelSerializer):
 
 
 
-# ! Full Book Detail Serializer
-class  BookDetailSerializer(ModelSerializer):
-    book=serializers.StringRelatedField()
+# !for Retrieving Book Detail Serializer
+class  GetBookDetailSerializer(ModelSerializer):
+    book=BookSerializer()
+
     class Meta:
         model = BookDetail
-        fields=['book','publisher','language','number_of_pages']
+        fields=[
+            'book',
+            'publisher',
+            'language',
+            'number_of_pages'
+        ]
 
-        
+
+
+
+# ! For Updating  The Book Details
+class  UpdateBookDetailSerializer(ModelSerializer):
+    book=serializers.StringRelatedField()
+
+    class Meta:
+        model = BookDetail
+        fields=[
+            'book',
+            'publisher',
+            'language',
+            'number_of_pages'
+        ]
+
+
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model=User
+        fields=['id','fullname']
+
+
+
+
+
