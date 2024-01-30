@@ -3,7 +3,10 @@ from .tokens import get_tokens_for_user
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
-    UserChangePasswordSerializer
+    UserChangePasswordSerializer,
+    SendResetPasswordEmailSerializer,
+    PasswordResetSerializer
+
 )
 
 
@@ -34,10 +37,15 @@ class UserRegistrationView(APIView):
         """
         Method to create a new user.
         """
+
         serializer=self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(_("User Registered successfully"),status=HTTP_201_CREATED)
+
+        return Response(
+            _("User Registered successfully"),
+            status=HTTP_201_CREATED
+        )
 
 
 
@@ -63,9 +71,15 @@ class UserLoginView(APIView):
         
         if user is not  None:
             token=get_tokens_for_user(user)
-            return Response({"token":token,"message":"Logged in successfully"},status=HTTP_200_OK)
+            return Response(
+                {"token":token,"message":"Logged in successfully"},
+                status=HTTP_200_OK
+            )
         else:
-            return Response(_("Invalid Credential provided"),status=HTTP_401_UNAUTHORIZED)
+            return Response(
+                _("Invalid Credential provided"),
+                status=HTTP_401_UNAUTHORIZED
+            )
 
 
 
@@ -73,7 +87,7 @@ class UserLoginView(APIView):
 # ! View For Changing Password
 class UserChangePasswordView(APIView):
     serializer_class=UserChangePasswordSerializer
-    # permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticated]
 
 
     def post(self,request) -> Response:
@@ -83,4 +97,51 @@ class UserChangePasswordView(APIView):
         user=request.user
         serializer=self.serializer_class(data=request.data,context={'user':user})
         serializer.is_valid(raise_exception=True)
-        return Response({"message":"Password changed successfully successfully"},status=HTTP_200_OK)
+
+        return Response(
+            {"message":"Password changed successfully successfully"},
+            status=HTTP_200_OK
+        )
+    
+
+
+
+# ! View For Sending Password Reset  Link
+class SendResetPasswordEmailView(APIView):
+    serializer_class=SendResetPasswordEmailSerializer
+    permission_classes=[AllowAny]
+
+    def post(self,request) -> Response:
+        """
+        Handle sending reset password link to the registered user via email.
+        """
+        serializer=self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        return Response(
+            _("Reset Password Email has been sent to the email"),
+            status=HTTP_200_OK
+        )
+    
+
+
+
+# !View For Resetting Password
+class PassswordResetView(APIView):
+    serializer_class=PasswordResetSerializer
+
+    def post(self,request,**kwargs) -> Response:
+        """
+        Handles Password Reset for valid token 
+        """
+        uid=self.kwargs['uid']
+        token=self.kwargs['token']
+
+        serializer=self.serializer_class(data=request.data,context={'uid':uid,'token':token})
+        serializer.is_valid(raise_exception=True)
+
+        return Response(
+            _("Password successfully changed"),
+            status=HTTP_200_OK
+        )
+
