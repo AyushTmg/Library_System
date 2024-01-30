@@ -1,5 +1,5 @@
 
-
+import os 
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,6 +11,11 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+PROJECT_APPS=[
+    'authentication',
+    'library'
+]
+
 
 
 INSTALLED_APPS = [
@@ -20,9 +25,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authentication',
-    'library'
+
 ]
+
+INSTALLED_APPS+=PROJECT_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -56,13 +62,34 @@ WSGI_APPLICATION = 'main.wsgi.application'
 
 
 
+# !DEFAULT DATABASE CONFIGURATION'S 
+"""
+If You dont want to use postgres as your database 
+You can use this instead just uncomment this one 
+and comment or remove the one beneth it 
+"""
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
+# !DATABASE CONFIGURATION'S FOR POSTGRE'S
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME':os.environ.get("DB_NAME"),
+        'USER': 'postgres', 
+        'PASSWORD':os.environ.get("DB_PASS"), 
+        'HOST': 'localhost', 
+
     }
 }
 
+# ! CONFIGURATION'S FOR CUSTOM USER MODEL
+AUTH_USER_MODEL='authentication.User'
 
 
 AUTH_PASSWORD_VALIDATORS = [
