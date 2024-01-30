@@ -70,7 +70,7 @@ class UserRegistrationSerializer(ModelSerializer):
 
 
 #! Serializer for User Login
-class UserLoginSerializer(serializers.ModelSerializer):
+class UserLoginSerializer(ModelSerializer):
     email=serializers.EmailField()
     password = serializers.CharField(
         write_only=True,
@@ -82,3 +82,59 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model=User
         fields=['email','password']
+
+
+
+
+#! Serializer for Changing Password
+class UserChangePasswordSerializer(serializers.Serializer):
+    old_password=serializers.CharField(
+        style={'input_type':'password'},
+        write_only=True,
+        validators=[validate_password]
+    )
+    new_password=serializers.CharField(
+        style={'input_type':'password'},
+        write_only=True,
+        validators=[validate_password]
+    )
+    new_password_confirmation=serializers.CharField(
+        style={'input_type':'password'},
+        write_only=True,
+        validators=[validate_password]
+    )
+    
+
+    def validate_old_password(self,value):
+        """
+        Method which Validate old password of 
+        User before Changing it 
+        """
+        user = self.context["user"]
+
+        if not user.check_password(value):
+            raise ValidationError(_("Current password doesn't match"))
+        return value
+    
+    
+    def validate(self, attrs):
+        """
+        Method which validate the new password and new 
+        password confirmation and  Set new password for
+        the user
+        """
+        old_password=attrs.get('old_password')
+        new_password=attrs.get('new_password')
+        new_password_confirmation=attrs.get('new_password_confirmation')
+
+        if new_password != new_password_confirmation:
+            raise ValidationError(_('Two Passwords does not match'))
+        
+        if old_password==new_password:
+            raise ValidationError(_('New passwords cannot be similar to current password '))
+        
+        user=self.context['user']
+        user.set_password(new_password)
+        user.save()
+
+        return attrs
