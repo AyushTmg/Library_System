@@ -8,7 +8,8 @@ from .serializers import (
     BookSerializer,
     GetBookDetailSerializer,
     UpdateBookDetailSerializer,
-    UserSerializer
+    UserListSerializer,
+    UserDetailSerializer
 
 )
 
@@ -23,7 +24,11 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
 )
 
+
 from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 
 
@@ -55,7 +60,7 @@ class  BooksListCreateView(ListCreateAPIView):
 
 
 
-# ! BookDetai View 
+# ! Book Detail View 
 class BookDetailView(RetrieveUpdateDestroyAPIView):
     """
     RetrieveUpdateDestroyAPIView is used  for 
@@ -75,7 +80,12 @@ class BookDetailView(RetrieveUpdateDestroyAPIView):
             by primary key present in URL parameter
             """
             pk = self.kwargs['pk']
-            return BookDetail.objects.filter(pk=pk).select_related('book')
+            
+            return (
+                 BookDetail.objects
+                 .filter(pk=pk)
+                 .select_related('book')
+                )
     
 
     def get_permissions(self):
@@ -88,17 +98,42 @@ class BookDetailView(RetrieveUpdateDestroyAPIView):
     
 
 
+
+# ! User List View
 class UserListView(APIView):
-    serailizer_class=UserSerializer
+    serailizer_class=UserListSerializer
 
     def get(self,request) -> Response:
-        User = get_user_model()
+        """
+        Return a list of all users
+        """
         user = User.objects.all()
         serializer = self.serailizer_class(user,many=True)
+        
         return  Response(serializer.data,status=HTTP_200_OK)
          
 
 
+
+# ! User Detail View 
+class UserDetailView(RetrieveUpdateDestroyAPIView):
+    serializer_class=UserDetailSerializer
+
+    def get_queryset(self):
+            """
+            Over Ridden queryset to filter User
+            by primary key present in URL parameter
+            """
+            pk = self.kwargs['pk']
+
+            return (
+                User.objects
+                .filter(pk=pk)
+                .prefetch_related('borrowed_book','book')
+            )
+
+
+    
 
 
 

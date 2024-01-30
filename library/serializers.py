@@ -98,10 +98,31 @@ class  UpdateBookDetailSerializer(ModelSerializer):
         ]
 
 
-class UserSerializer(ModelSerializer):
+
+
+# !User List Serializer
+class UserListSerializer(ModelSerializer):
     class Meta:
         model=User
         fields=['id','fullname']
+
+
+
+
+# ! User Detail Serializer
+class UserDetailSerializer(ModelSerializer):
+    book=BookSerializer(many=True)
+    
+    class Meta:
+        model=User
+        fields=[
+            'id',
+            'book',
+            'fullname',
+            'borrowed_book'
+        ]
+
+
 
 
 
