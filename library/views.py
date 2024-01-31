@@ -9,23 +9,27 @@ from .serializers import (
     GetBookDetailSerializer,
     UpdateBookDetailSerializer,
     UserListSerializer,
-    UserDetailSerializer
+    UserDetailSerializer,
+    GetUserBorrowedBookSerailizer,
+    CreaterBorrowedBookSerailizer
 
 )
 
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.status import  HTTP_200_OK
+from rest_framework.status import  HTTP_200_OK,HTTP_201_CREATED,HTTP_404_NOT_FOUND
 from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.generics import (
     ListCreateAPIView,
+    RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
 
 
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 
 
 User = get_user_model()
@@ -99,6 +103,77 @@ class BookDetailView(RetrieveUpdateDestroyAPIView):
 
 
 
+
+ # ! BookBorrow View 
+class CreateBookBorrowView(APIView):
+    """
+    Method to create borrow book instance when 
+    user post 
+    """
+    serializer_class=CreaterBorrowedBookSerailizer
+    permission_classes=[IsAuthenticated]
+
+
+    def get(self, request, *args, **kwargs):
+        """
+        This methods helps to shows if a particular books 
+        is available or not
+        """
+        user=request.user
+        pk = self.kwargs['pk']
+
+        user_borrow=BorrowedBook.objects.filter(user=user,pk=pk)
+        other_borrow=BorrowedBook.objects.filter(pk=pk)
+        
+        # ! Checks if the logged in user has borrowed this book or not 
+        if user_borrow.exists():
+            return Response(
+                "You've already borrowed this book",
+                status=HTTP_200_OK
+                )
+        
+        # ! Checks if any other user has borrowed this book or not
+        elif other_borrow.exists():
+             return Response(
+                "Sorry Some other user has borrowed this book for now Please wait untill the book is returned and avaiable in library, Thank You",
+                status=HTTP_404_NOT_FOUND
+                )
+        
+        # ! It is executed if both of upper conditional statement is False 
+        else:
+            return get_object_or_404(Book,id=pk)
+
+
+    def post(self, request, *args, **kwargs):
+        """
+        This method helps to add a new Book into database
+        and also pass user_id and book_id present at URL
+        parameter to serializer class
+        """
+
+        user_id=request.user.id
+        pk = self.kwargs['pk']
+        
+        serializer=self.serializer_class(
+             data=request.data,
+             context={
+                  'user_id':user_id,
+                  'book_id':pk
+                  }
+            )
+        
+        #* validating and save the borrow book instance
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+             "You've Successfully Borrowed the book",
+             status=HTTP_201_CREATED
+            )
+    
+
+
+
 # ! User List View
 class UserListView(APIView):
     serailizer_class=UserListSerializer
@@ -109,14 +184,13 @@ class UserListView(APIView):
         """
         user = User.objects.all()
         serializer = self.serailizer_class(user,many=True)
-        
         return  Response(serializer.data,status=HTTP_200_OK)
          
 
 
 
 # ! User Detail View 
-class UserDetailView(RetrieveUpdateDestroyAPIView):
+class UserDetailView(RetrieveUpdateAPIView):
     serializer_class=UserDetailSerializer
 
     def get_queryset(self):
@@ -129,7 +203,10 @@ class UserDetailView(RetrieveUpdateDestroyAPIView):
             return (
                 User.objects
                 .filter(pk=pk)
-                .prefetch_related('borrowed_book','book')
+                .prefetch_related(
+                    'book',
+                    'borrowed_book',
+                )
             )
 
 
