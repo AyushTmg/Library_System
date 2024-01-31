@@ -7,8 +7,20 @@ class User(AbstractBaseUser,PermissionsMixin):
     Custom User  model that supports using email as
     USERNAME_FIELD instead of username.
     """
+    MEMBERSHIP_BRONZE = 'B'
+    MEMBERSHIP_SILVER = 'S'
+    MEMBERSHIP_GOLD = 'G'
+
+    MEMBERSHIP_CHOICES = [
+        (MEMBERSHIP_BRONZE, 'Bronze'),
+        (MEMBERSHIP_SILVER, 'Silver'),
+        (MEMBERSHIP_GOLD, 'Gold'),
+    ]
     fullname=models.CharField(max_length=150)
     email=models.EmailField(unique=True)
+    membership = models.CharField(
+        max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE
+        )
 
     is_active=models.BooleanField(default=True)
     is_staff=models.BooleanField(default=False)

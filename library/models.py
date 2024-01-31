@@ -44,7 +44,7 @@ class BorrowedBook(models.Model):
     borrowed_at=models.DateField(auto_now_add=True)
     returned_at=models.DateField(null=True,blank=True)
     user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT,related_name='borrowed_book')
-    book=models.ForeignKey(Book,on_delete=models.PROTECT,related_name='borrowwed_book')
+    book=models.OneToOneField(Book,on_delete=models.PROTECT,related_name='borrowed_book',primary_key=True)
 
 
     def __str__(self) -> str:
