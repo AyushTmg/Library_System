@@ -9,7 +9,6 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer,ValidationError
 
 
-from django.conf import settings 
 from django.contrib.auth import get_user_model
 
 
@@ -100,18 +99,8 @@ class  UpdateBookDetailSerializer(ModelSerializer):
 
 # ! Get Borrowed Book Serialzer
 class GetUserBorrowedBookSerailizer(ModelSerializer):
-    returned_status=serializers.SerializerMethodField('get_return_status')
     book=BookSerializer()
 
-    def get_return_status(self,borrowwed_book):
-        """
-        Custom serailizer field fro showing 
-        returned book status 
-        """
-        if borrowwed_book.returned_at==None:
-            return  "Not Returned Yet"
-        else:
-            return "ALready Returned"
         
     class Meta:
         model=BorrowedBook
@@ -120,7 +109,7 @@ class GetUserBorrowedBookSerailizer(ModelSerializer):
             'book',
             'borrowed_at',
             'returned_at',
-            'returned_status',
+            'is_returned'
         ]
 
 
@@ -201,18 +190,7 @@ class UserDetailSerializer(ModelSerializer):
 class ListBorrowedBookSerializer(ModelSerializer):
     book=BookSerializer()
     user=serializers.StringRelatedField()
-    returned_status=serializers.SerializerMethodField('get_return_status')
 
-    def get_return_status(self,borrowwed_book):
-        """
-        Custom serailizer field fro showing 
-        returned book status 
-        """
-        if borrowwed_book.returned_at==None:
-            return  "Not Returned Yet"
-        else:
-            return "ALready Returned"
-        
 
     class Meta:
         model=BorrowedBook
@@ -222,6 +200,39 @@ class ListBorrowedBookSerializer(ModelSerializer):
             'book',
             'borrowed_at',
             'returned_at',
-            'returned_status',
+            'is_returned'
+        ] 
 
-        ]
+
+
+
+# ! Return Book Serializer
+class ReturnBookSerializer(serializers.Serializer):
+    user_id=serializers.IntegerField()
+    book_id=serializers.IntegerField()
+    
+
+    def validate(self, attrs):
+        """
+        Some Validation while returning a book
+        """
+        user_id=attrs.get('user_id')
+        book_id=attrs.get('book_id')
+        
+        # ! Validates if user with the given user_id exists 
+        if not User.objects.filter(id=user_id).exists():
+            raise ValidationError(
+                "User Doesn't exist with given user id"
+            )
+        
+        # ! Validates if book with the given book_id exists 
+        if not Book.objects.filter(id=book_id).exists():
+            raise ValidationError(
+                "Book Doesn't exist with given book id"
+            )
+        
+        return attrs
+
+
+
+   

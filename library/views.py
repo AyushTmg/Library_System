@@ -10,18 +10,22 @@ from .serializers import (
     UpdateBookDetailSerializer,
     UserListSerializer,
     UserDetailSerializer,
-    GetUserBorrowedBookSerailizer,
     CreaterBorrowedBookSerailizer,
-    ListBorrowedBookSerializer
+    ListBorrowedBookSerializer,
+    ReturnBookSerializer
 
 )
 
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.status import  HTTP_200_OK,HTTP_201_CREATED,HTTP_404_NOT_FOUND
 from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated,AllowAny,IsAdminUser
+from rest_framework.status import  (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_404_NOT_FOUND
+)
 from rest_framework.generics import (
     ListAPIView,
     ListCreateAPIView,
@@ -102,8 +106,6 @@ class BookDetailView(RetrieveUpdateDestroyAPIView):
             return  [AllowAny()]
         return [IsAuthenticated()]
     
-    
-
 
 
 
@@ -185,16 +187,23 @@ class UserListView(APIView):
         """
         Return a list of all users
         """
-        user = User.objects.all()
-        serializer = self.serailizer_class(user,many=True)
-        return  Response(serializer.data,status=HTTP_200_OK)
-         
+
+        #! If the user is staff or superuser
+        if (self.request.user.is_superuser or self.request.user.is_staff):
+            user = User.objects.all()
+            serializer = self.serailizer_class(user,many=True)
+            return  Response(serializer.data,status=HTTP_200_OK)
+        
+        else:
+             return Response("Not Found",status=HTTP_404_NOT_FOUND)
+            
 
 
 
 # ! User Detail View 
 class UserDetailView(RetrieveUpdateAPIView):
     serializer_class=UserDetailSerializer
+    permission_classes=[IsAuthenticated]
 
     def get_queryset(self):
             """
@@ -203,25 +212,84 @@ class UserDetailView(RetrieveUpdateAPIView):
             """
             pk = self.kwargs['pk']
 
-            return (
-                User.objects
-                .filter(pk=pk)
-                .prefetch_related(
-                    'book',
-                    'borrowed_book',
+
+            #! IF the user is staff or superuser
+            if (self.request.user.is_superuser or self.request.user.is_staff):
+                return (
+                    User.objects
+                    .filter(pk=pk)
+                    .prefetch_related(
+                        'book',
+                        'borrowed_book',
+                        'borrowed_book__book',
+                    )
                 )
-            )
+            
 
+            #! For normal user 
+            if pk==str(self.request.user.id):
+                return (
+                    User.objects
+                    .filter(id=pk)
+                    .prefetch_related(
+                        'book',
+                        'borrowed_book',
+                        'borrowed_book__book',
+                    ))
+            
+            # ! If expectionally both conditional statement fails
+            # !By default status 404 will be returned 
 
+ 
 
     
 # ! For Listing all the borrowed books from the library
 class ListBorrowedBookView(ListAPIView):
-     queryset=BorrowedBook.objects.all().select_related('book','user')
-     serializer_class=ListBorrowedBookSerializer
-     permission_classes=[IsAdminUser]
-     
+    queryset=(
+        BorrowedBook.objects
+        .filter(is_returned=False)
+        .select_related('book','user')
+    )
+    serializer_class=ListBorrowedBookSerializer
+    permission_classes=[IsAdminUser]
+    
 
 
+#! Return Book View 
+class ReturnBookView(APIView):
+    serializer_class=ReturnBookSerializer
+    permission_classes=[IsAdminUser]
+    
+    def post(self, request, *args, **kwargs):
+        """
+        This is a custom function to return the book
+        for admin/librarian only
+        """
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-     
+        #!Gets the validated_data from serailizer
+        user_id = serializer.validated_data['user_id']
+        book_id = serializer.validated_data['book_id']
+
+        #! Checks if Boorrowed Book instance  exists with given 
+        # !User_id and Book_id
+        try:
+            borrowed_book =BorrowedBook.objects.get(
+                user_id=user_id,
+                book_id=book_id,
+                is_returned=False
+                )
+        except Exception as e:
+             return Response(
+                "No such book for given user_id found!",
+                status=HTTP_404_NOT_FOUND
+                )
+        
+        # ! If every validation is passed it calls the custom
+        # !function which records the returned date for the instance
+        borrowed_book.book_returned()
+        return Response(
+            "Book returned successfully.",
+            status=HTTP_200_OK
+        )
