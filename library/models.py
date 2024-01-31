@@ -40,6 +40,12 @@ class BookDetail(models.Model):
         return  f"{self.publisher}_{self.book}"
 
 
+class BorrowHistory(models.Model):
+    borrowed_at=models.DateField()
+    returned_at=models.DateField()
+    user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT,related_name='borrowed_book_history')
+    book=models.ForeignKey(Book,on_delete=models.PROTECT,related_name='borrowed_book_history')
+
 
 # !Borrow Book 
 class BorrowedBook(models.Model):
@@ -62,3 +68,17 @@ class BorrowedBook(models.Model):
             self.is_returned = True
             self.returned_at = timezone.now().date()
             self.save()
+            """
+            Add a history of this borrowed book into 
+            'Borrow History Model
+            """
+            BorrowHistory.objects.create(
+                borrowed_at=self.borrowed_at,
+                returned_at=self.returned_at,
+                user=self.user,
+                book=self.book
+            )
+            # !Delete the instance after recording it
+            self.delete()
+
+
