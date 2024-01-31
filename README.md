@@ -73,6 +73,6 @@ Technologies used:Django, Django Rest Framework,Simple JWT ,Celery, Django Debug
 --
         python manage.py runserver
 
-## API documentation
+## API documentation for Library System
 
-        https://documenter.getpostman.com/view/30946823/2s9YytgfuE
+https://documenter.getpostman.com/view/30946823/2s9YytgfuE
