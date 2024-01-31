@@ -104,6 +104,10 @@ class GetUserBorrowedBookSerailizer(ModelSerializer):
     book=BookSerializer()
 
     def get_return_status(self,borrowwed_book):
+        """
+        Custom serailizer field fro showing 
+        returned book status 
+        """
         if borrowwed_book.returned_at==None:
             return  "Not Returned Yet"
         else:
@@ -193,7 +197,31 @@ class UserDetailSerializer(ModelSerializer):
 
 
 
+# ! Book List Serializer 
+class ListBorrowedBookSerializer(ModelSerializer):
+    book=BookSerializer()
+    user=serializers.StringRelatedField()
+    returned_status=serializers.SerializerMethodField('get_return_status')
 
+    def get_return_status(self,borrowwed_book):
+        """
+        Custom serailizer field fro showing 
+        returned book status 
+        """
+        if borrowwed_book.returned_at==None:
+            return  "Not Returned Yet"
+        else:
+            return "ALready Returned"
+        
 
+    class Meta:
+        model=BorrowedBook
+        fields=[
+            'pk',
+            'user',
+            'book',
+            'borrowed_at',
+            'returned_at',
+            'returned_status',
 
-
+        ]

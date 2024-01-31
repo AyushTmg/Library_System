@@ -11,7 +11,8 @@ from .serializers import (
     UserListSerializer,
     UserDetailSerializer,
     GetUserBorrowedBookSerailizer,
-    CreaterBorrowedBookSerailizer
+    CreaterBorrowedBookSerailizer,
+    ListBorrowedBookSerializer
 
 )
 
@@ -20,8 +21,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import  HTTP_200_OK,HTTP_201_CREATED,HTTP_404_NOT_FOUND
 from rest_framework import permissions
-from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.permissions import IsAuthenticated,AllowAny,IsAdminUser
 from rest_framework.generics import (
+    ListAPIView,
     ListCreateAPIView,
     RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
@@ -100,11 +102,12 @@ class BookDetailView(RetrieveUpdateDestroyAPIView):
             return  [AllowAny()]
         return [IsAuthenticated()]
     
+    
 
 
 
 
- # ! BookBorrow View 
+ # ! Create Book Borrow View 
 class CreateBookBorrowView(APIView):
     """
     Method to create borrow book instance when 
@@ -210,9 +213,14 @@ class UserDetailView(RetrieveUpdateAPIView):
             )
 
 
+
     
-
-
+# ! For Listing all the borrowed books from the library
+class ListBorrowedBookView(ListAPIView):
+     queryset=BorrowedBook.objects.all().select_related('book','user')
+     serializer_class=ListBorrowedBookSerializer
+     permission_classes=[IsAdminUser]
+     
 
 
 
