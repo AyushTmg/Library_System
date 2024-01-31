@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+
 
 
 
@@ -39,13 +41,24 @@ class BookDetail(models.Model):
 
 
 
-
+# !Borrow Book 
 class BorrowedBook(models.Model):
     borrowed_at=models.DateField(auto_now_add=True)
     returned_at=models.DateField(null=True,blank=True)
+    is_returned=models.BooleanField(default=False)
     user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT,related_name='borrowed_book')
     book=models.OneToOneField(Book,on_delete=models.PROTECT,related_name='borrowed_book',primary_key=True)
 
 
     def __str__(self) -> str:
         return f"{self.user} borrowed {self.book}"
+    
+
+    def book_returned(self):
+        """
+        Custom method to mark the book as returned.
+        """
+        if not self.is_returned:
+            self.is_returned = True
+            self.returned_at = timezone.now().date()
+            self.save()
