@@ -69,9 +69,10 @@ Technologies used:Django, Django Rest Framework,Simple JWT ,Celery, Django Debug
         python manage.py makemigrations 
         python manage.py migrate
 
-7-Run Application
+7-Run Application with celery 
 --
         python manage.py runserver
+        celery -A main worker -l info
 
 ## API documentation for Library System
 
