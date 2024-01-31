@@ -2,17 +2,19 @@ from .models import (
     Book,
     BookDetail,
     BorrowedBook,
+    BorrowHistory
 )
 
 from .serializers import (
     BookSerializer,
-    GetBookDetailSerializer,
-    UpdateBookDetailSerializer,
     UserListSerializer,
+    ReturnBookSerializer,
     UserDetailSerializer,
-    CreaterBorrowedBookSerailizer,
+    GetBookDetailSerializer,
     ListBorrowedBookSerializer,
-    ReturnBookSerializer
+    UpdateBookDetailSerializer,
+    ListBorrowHistorySerializer,
+    CreaterBorrowedBookSerailizer,
 
 )
 
@@ -35,7 +37,6 @@ from rest_framework.generics import (
 
 
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 
 
 User = get_user_model()
@@ -65,7 +66,7 @@ class  BooksListCreateView(ListCreateAPIView):
         """
         if self.request.method in permissions.SAFE_METHODS:
             return  [AllowAny()]
-        return [IsAuthenticated()]
+        return [IsAdminUser()]
     
 
 
@@ -104,7 +105,7 @@ class BookDetailView(RetrieveUpdateDestroyAPIView):
         """
         if self.request.method in permissions.SAFE_METHODS:
             return  [AllowAny()]
-        return [IsAuthenticated()]
+        return [IsAdminUser()]
     
 
 
@@ -127,8 +128,8 @@ class CreateBookBorrowView(APIView):
         user=request.user
         pk = self.kwargs['pk']
 
-        user_borrow=BorrowedBook.objects.filter(user=user,pk=pk)
-        other_borrow=BorrowedBook.objects.filter(pk=pk)
+        user_borrow=BorrowedBook.objects.filter(user=user,pk=pk,is_returned=False)
+        other_borrow=BorrowedBook.objects.filter(pk=pk,is_returned=False)
         
         # ! Checks if the logged in user has borrowed this book or not 
         if user_borrow.exists():
@@ -144,9 +145,12 @@ class CreateBookBorrowView(APIView):
                 status=HTTP_404_NOT_FOUND
                 )
         
-        # ! It is executed if both of upper conditional statement is False 
+        # !if statement executes if book id given at the URL pattern exists
+        book=Book.objects.filter(pk=pk).exists()
+        if book:
+            return Response(status=HTTP_200_OK)
         else:
-            return get_object_or_404(Book,id=pk)
+            return Response("Invalid Parameter",status=HTTP_404_NOT_FOUND)
 
 
     def post(self, request, *args, **kwargs):
@@ -183,6 +187,7 @@ class CreateBookBorrowView(APIView):
 class UserListView(APIView):
     serailizer_class=UserListSerializer
 
+
     def get(self,request) -> Response:
         """
         Return a list of all users
@@ -204,6 +209,7 @@ class UserListView(APIView):
 class UserDetailView(RetrieveUpdateAPIView):
     serializer_class=UserDetailSerializer
     permission_classes=[IsAuthenticated]
+
 
     def get_queryset(self):
             """
@@ -255,11 +261,13 @@ class ListBorrowedBookView(ListAPIView):
     
 
 
+
 #! Return Book View 
 class ReturnBookView(APIView):
     serializer_class=ReturnBookSerializer
     permission_classes=[IsAdminUser]
     
+
     def post(self, request, *args, **kwargs):
         """
         This is a custom function to return the book
@@ -272,8 +280,7 @@ class ReturnBookView(APIView):
         user_id = serializer.validated_data['user_id']
         book_id = serializer.validated_data['book_id']
 
-        #! Checks if Boorrowed Book instance  exists with given 
-        # !User_id and Book_id
+        #! Checks if Boorrowed Book instance  exists with given User_id and Book_id
         try:
             borrowed_book =BorrowedBook.objects.get(
                 user_id=user_id,
@@ -286,10 +293,26 @@ class ReturnBookView(APIView):
                 status=HTTP_404_NOT_FOUND
                 )
         
-        # ! If every validation is passed it calls the custom
-        # !function which records the returned date for the instance
+        # ! If every validation is passed it calls the customf unction which records the returned date for the instance
         borrowed_book.book_returned()
+
         return Response(
             "Book returned successfully.",
             status=HTTP_200_OK
         )
+
+
+
+
+# ! For Listing all the borrowed books History 
+class ListBorrowedHistoryView(ListAPIView):
+    """
+    View for Retrieving Borrowed Hostory
+    """
+    queryset=(
+        BorrowHistory.objects.all()
+        .prefetch_related('user','book')
+    )
+    serializer_class=ListBorrowHistorySerializer
+    permission_classes=[IsAdminUser]
+    

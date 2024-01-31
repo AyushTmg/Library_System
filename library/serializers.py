@@ -2,6 +2,7 @@ from .models import (
     Book,
     BookDetail,
     BorrowedBook,
+    BorrowHistory
 )
 
 
@@ -61,6 +62,8 @@ class BookSerializer(ModelSerializer):
         BookDetail.objects.create(book=book, **book_detail_data)
 
         return book
+    
+
     
 
 
@@ -133,8 +136,8 @@ class CreaterBorrowedBookSerailizer(ModelSerializer):
         user_id= self.context['user_id']
         book_id =self.context['book_id']
 
-        user_has_borrowed=BorrowedBook.objects.filter(user_id=user_id,book_id=book_id)
-        others_has_borrowed=BorrowedBook.objects.filter(book_id=book_id)
+        user_has_borrowed=BorrowedBook.objects.filter(user_id=user_id,book_id=book_id,is_returned=False)
+        others_has_borrowed=BorrowedBook.objects.filter(book_id=book_id,is_returned=False)
 
         # ! Checks if the logged in user has borrowed this book or not 
         if user_has_borrowed.exists():
@@ -156,7 +159,12 @@ class CreaterBorrowedBookSerailizer(ModelSerializer):
         """
         user_id= self.context['user_id']
         book_id =self.context['book_id']
-        return BorrowedBook.objects.create(user_id=user_id,book_id=book_id)
+
+        return (
+            BorrowedBook.objects.create(
+                user_id=user_id,
+                book_id=book_id
+            ))
 
 
 
@@ -183,6 +191,7 @@ class UserDetailSerializer(ModelSerializer):
             'book',
             'borrowed_book'
         ]
+
 
 
 
@@ -236,3 +245,16 @@ class ReturnBookSerializer(serializers.Serializer):
 
 
    
+# ! Book Borrow History Serailizer
+class ListBorrowHistorySerializer(ModelSerializer):
+    user=serializers.StringRelatedField()
+    book=serializers.StringRelatedField()
+    
+    class Meta:
+        model = BorrowHistory
+        fields=[
+            'user',
+            'book',
+            'borrowed_at',
+            'returned_at',
+        ]
