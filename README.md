@@ -90,6 +90,7 @@ Upon returning books, a notification is sent, confirming the return and providin
         python manage.py migrate
         python manage.py runserver
 
-7-Run Application
+7-Run Application with celery 
 --
         python manage.py runserver
+        celery -A main worker -l info
