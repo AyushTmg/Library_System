@@ -87,8 +87,9 @@ Upon returning books, a notification is sent, confirming the return and providin
 
 6-Migrate the changes to your database
 --
+        python manage.py makemigrations
         python manage.py migrate
-        python manage.py runserver
+        
 
 7-Run Application with celery 
 --
