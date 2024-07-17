@@ -21,7 +21,7 @@ Technologies used:Django, Django Rest Framework,Simple JWT ,Celery, Django Debug
 1-First of all clone this repo
 --
 
-        https://github.com/AyushTmg/Library_System_Ramailo_Tech.gitt
+        git@github.com:AyushTmg/Library_System.git
 
 
 2-Setup a virtual enviroment
